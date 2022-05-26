@@ -1,0 +1,7 @@
+make --dry-run --keep-going --print-directory
+make: Entering directory '/home/kestrel/DB'
+cc    -c -o main.o main.c
+gcc -o project_DB.out main.c -lsqlite3
+rm -f *.o
+make: Leaving directory '/home/kestrel/DB'
+ 
