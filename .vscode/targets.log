@@ -6,7 +6,7 @@ make all --print-data-base --no-builtin-variables --no-builtin-rules --question
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Fri May 27 05:24:56 2022
+# Make data base, printed on Thu Jun  2 01:08:06 2022
 
 # Variables
 
@@ -51,7 +51,7 @@ LESSOPEN = | /usr/bin/lesspipe %s
 # environment
 VSCODE_CWD = /home/kestrel
 # environment
-SSH_CONNECTION = 172.30.1.254 52483 172.30.1.44 56789
+SSH_CONNECTION = 172.30.1.254 54198 172.30.1.44 56789
 # environment
 PATH = /home/kestrel/.vscode-server/bin/c3511e6c69bb39013c4a4b7b9566ec1ca73fc4d5/bin/remote-cli:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
 # environment
@@ -69,7 +69,7 @@ VSCODE_PIPE_LOGGING = true
 # environment
 PWD = /home/kestrel/DB
 # environment
-VSCODE_IPC_HOOK_CLI = /run/user/1002/vscode-ipc-e5b76cd9-f284-4c59-baea-0f489b39a25c.sock
+VSCODE_IPC_HOOK_CLI = /run/user/1002/vscode-ipc-a98d760a-8a0d-45a8-b678-6037616f393a.sock
 # automatic
 *D = $(patsubst %/,%,$(dir $*))
 # environment
@@ -97,7 +97,7 @@ MAKECMDGOALS := all
 # environment
 SHLVL = 3
 # environment
-XDG_SESSION_ID = 678
+XDG_SESSION_ID = 85
 # environment
 USER = kestrel
 # makefile
@@ -106,8 +106,6 @@ USER = kestrel
 %D = $(patsubst %/,%,$(dir $%))
 # default
 MAKE_COMMAND := make
-# environment
-OLDPWD = /home/kestrel/.vscode-server/bin/c3511e6c69bb39013c4a4b7b9566ec1ca73fc4d5
 # default
 .VARIABLES := 
 # automatic
@@ -117,7 +115,7 @@ MAKEFLAGS = pqrR
 # environment
 MFLAGS = -pqrR
 # environment
-SSH_CLIENT = 172.30.1.254 52483 56789
+SSH_CLIENT = 172.30.1.254 54198 56789
 # environment
 MAIL = /var/mail/kestrel
 # automatic
@@ -147,7 +145,7 @@ LANG = C
 # environment
 VSCODE_EXTHOST_WILL_SEND_SOCKET = true
 # variable set hash-table stats:
-# Load=68/1024=7%, Rehash=0, Collisions=8/93=9%
+# Load=67/1024=7%, Rehash=0, Collisions=8/92=9%
 
 # Pattern-specific Variable Values
 
@@ -214,13 +212,13 @@ main.o:
 
 # No general ('VPATH' variable) search path.
 
-# strcache buffers: 1 (0) / strings = 17 / storage = 144 B / avg = 8 B
-# current buf: size = 8162 B / used = 144 B / count = 17 / avg = 8 B
+# strcache buffers: 1 (0) / strings = 17 / storage = 145 B / avg = 8 B
+# current buf: size = 8162 B / used = 145 B / count = 17 / avg = 8 B
 
 # strcache performance: lookups = 24 / hit rate = 29%
 # hash-table stats:
 # Load=17/8192=0%, Rehash=0, Collisions=1/24=4%
-# Finished Make data base on Fri May 27 05:24:56 2022
+# Finished Make data base on Thu Jun  2 01:08:06 2022
 
  
 make: *** No rule to make target 'all'.  Stop.
