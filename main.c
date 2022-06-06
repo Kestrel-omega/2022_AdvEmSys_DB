@@ -236,7 +236,7 @@ void add_genre(char *genrename)
             printf("Add genre failed!\r\n");
     }
 }
-void add_artist(char **artistname)
+void add_artist(char *artistname)
 {
     char *errMsg = NULL;
     char **results;
@@ -273,7 +273,7 @@ void add_artist(char **artistname)
             printf("Add genre failed!\r\n");
     }
 }
-void add_song(int songid, char *songname, char **artistname, char *genrename)
+int add_song(int songid, char *songname)
 {
     char *errMsg = NULL;
     char **results;
@@ -293,23 +293,32 @@ void add_song(int songid, char *songname, char **artistname, char *genrename)
             {
                 snprintf(buf, sizeof(buf), "INSERT into song (songid, songname) values('%d', '%s');", songid, songname);
                 ret = sqlite3_get_table(handle, buf, &results, &rows, &columns, &errMsg);
-                if (ret != SQLITE_OK)
-                    printf("Add song failed! (1)\r\n");
-                do
+                if (ret == SQLITE_OK)
                 {
-
-                } while (artistname[i - 1] != NULL);
-                add_artist(artistname);
-                add_genre(genrename);
+                    printf("%d: %s successfully added!\r\n", songid, songname);
+                    sqlite3_free_table(results);
+                    return 0;
+                }
+                else
+                {
+                    printf("Add song failed!\r\n");
+                    sqlite3_free_table(results);
+                    return 1;
+                }
             }
             else
             {
                 printf("%s is already registered!\r\n", songname);
+                sqlite3_free_table(results);
+                return 1;
             }
-            sqlite3_free_table(results);
         }
         else
+        {
             printf("Add song failed!\r\n");
+            sqlite3_free_table(results);
+            return 1;
+        }
     }
 }
 void list_table(char *tablename)
@@ -351,32 +360,99 @@ void add_music_func(int userid)
 {
     int songid;
     char songname[50];
-    char artistname[5][16];
+    char artistname[16];
     char genrename[16];
+    int genreid;
     int count = 0;
+    char *errMsg = NULL;
+    char **results;
+    int rows;
+    int columns;
+    int ret;
+    char buf[80];
 
     printf("Music ID (TJ) : ");
     scanf("%d", &songid);
     printf("Music Name : ");
     scanf("%s", songname);
-    printf("Artist Name (enter - to stop): ");
-    do
+    if (!add_song(songid, songname))
     {
-        scanf("%s", artistname[count]);
-        count++;
-    } while (artistname[count - 1][0] != '-' && count < 5);
+        printf("Artist Name (enter - to stop): ");
+        do
+        {
+            scanf("%s", artistname);
+            add_artist(artistname);
+            count++;
+        } while (artistname[0] != '-' && count < 5);
 
-    printf("Genre Name : ");
-    scanf("%s", genrename);
+        printf("Genre Name : ");
+        scanf("%s", genrename);
+        add_genre(genrename);
+        snprintf(buf, sizeof(buf), "SELECT * FROM genre WHERE (genrename='%s');", genrename);
+        ret = sqlite3_get_table(handle, buf, &results, &rows, &columns, &errMsg);
+        if (ret == SQLITE_OK)
+        {
+            genreid = atoi(results[columns]);
+            sqlite3_free_table(results);
+        }
+    }
+
+    snprintf(buf, sizeof(buf), "INSERT into playlist (userid, songid, ) values('%d', '%d');", userid, songid);
+    ret = sqlite3_get_table(handle, buf, &results, &rows, &columns, &errMsg);
+
 }
-void search_music_func()
+/*void search_music_func(int userid)
 {
-    
-}
-void rate_difficulty_func()
+    char *errMsg = NULL;
+    char **results;
+    int rows;
+    int columns;
+    int ret;
+    char buf[80];
+    int i = 0;
+
+    if (flag_init == 1)
+    {
+        snprintf(buf, sizeof(buf), "SELECT * FROM song WHERE (songid='%d');", songid);
+        ret = sqlite3_get_table(handle, buf, &results, &rows, &columns, &errMsg);
+        if (ret == SQLITE_OK)
+        {
+            if (rows == 0)
+            {
+                snprintf(buf, sizeof(buf), "INSERT into song (songid, songname) values('%d', '%s');", songid, songname);
+                ret = sqlite3_get_table(handle, buf, &results, &rows, &columns, &errMsg);
+                if (ret == SQLITE_OK)
+                {
+                    printf("%d: %s successfully added!\r\n", songid, songname);
+                    sqlite3_free_table(results);
+                    return 0;
+                }
+                else
+                {
+                    printf("Add song failed!\r\n");
+                    sqlite3_free_table(results);
+                    return 1;
+                }
+            }
+            else
+            {
+                printf("%s is already registered!\r\n", songname);
+                sqlite3_free_table(results);
+                return 1;
+            }
+        }
+        else
+        {
+            printf("Add song failed!\r\n");
+            sqlite3_free_table(results);
+            return 1;
+        }
+    }
+}*/
+void rate_difficulty_func(int userid)
 {
 }
-void recommend_music_func()
+void recommend_music_func(int userid)
 {
 }
 
@@ -450,35 +526,34 @@ LOGIN_SELECT:
         goto LOGIN_SELECT;
     }
 
-MENU_SELECT:
-
-    select_menu = 0;
-    if (userid > 0)
+    while (1)
     {
-        system("clear");
-        printf("1) ADD Music\r\n2) SEARCH Music\r\n3) RATE Difficulty of Music\r\n3) Music Recommendation\r\nChoose Menu : ");
-        scanf("%d", &select_menu);
-        switch (select_menu)
+        select_menu = 0;
+        if (userid > 0)
         {
-        case 1:
-            add_music_func(userid);
-            break;
-        case 2:
-            search_music_func();
-            break;
-        case 3:
-            rate_difficulty_func();
-            break;
-        case 4:
-            recommend_music_func();
-            break;
-        default:
-        {
-            printf("Wrong menu selected!, Try again\r\n");
-            goto MENU_SELECT;
-        }
+            system("clear");
+            printf("1) ADD Music\r\n2) SEARCH Music\r\n3) RATE Difficulty of Music\r\n4) Music Recommendation\r\n0) Exit Program\r\nChoose Menu : ");
+            scanf("%d", &select_menu);
+            switch (select_menu)
+            {
+            case 1:
+                add_music_func(userid);
+                break;
+            case 2:
+                search_music_func(userid);
+                break;
+            case 3:
+                rate_difficulty_func(userid);
+                break;
+            case 4:
+                recommend_music_func(userid);
+                break;
+            case 0:
+                return 0;
+            default:
+                printf("Wrong menu selected!, Try again\r\n");
+                break;
+            }
         }
     }
-
-    return 0;
 }
