@@ -66,11 +66,11 @@ void init_table()
     printf("Starting Program...\r\n");
 
     ret = sqlite3_get_table(handle,
-                            "CREATE TABLE user (userid INTEGER PRIMARY KEY ASC, pw TEXT, nickname TEXT);"                                   // create user table
-                            "CREATE TABLE song (songid INTEGER PRIMARY KEY NOT NULL, songname TEXT, artistid INTEGER, genreid INTEGER);"    // create song table
-                            "CREATE TABLE playlist (playlist INTEGER PRIMARY KEY ASC, userid INTEGER, songid INTEGER, difficulty INTEGER);" // create playlist table
-                            "CREATE TABLE genre (genreid INTEGER PRIMARY KEY ASC, genrename TEXT);"                                         // create genre table
-                            "CREATE TABLE artist (artistid INTEGER PRIMARY KEY ASC, artistname TEXT);"                                      // create artist table
+                            "CREATE TABLE user (userid INTEGER PRIMARY KEY ASC, pw TEXT, nickname TEXT);"                                               // create user table
+                            "CREATE TABLE song (songid INTEGER PRIMARY KEY NOT NULL, songname TEXT, artistid INTEGER, genreid INTEGER);"                // create song table
+                            "CREATE TABLE playlist (playlist INTEGER PRIMARY KEY ASC, userid INTEGER NOT NULL, songid INTEGER, difficulty INTEGER);"    // create playlist table
+                            "CREATE TABLE genre (genreid INTEGER PRIMARY KEY ASC, genrename TEXT);"                                                     // create genre table
+                            "CREATE TABLE artist (artistid INTEGER PRIMARY KEY ASC, artistname TEXT);"                                                  // create artist table
                             // "CREATE TABLE song_artist (said INTEGER PRIMARY KEY ASC, songid INTEGER, artistid INTEGER);"                    // create song-artist link table
                             ,
                             &results, &rows, &columns, &errMsg);
@@ -84,6 +84,50 @@ void init_table()
     else
     {
         printf("Initialize Error!\r\n");
+    }
+}
+int login(char *username, char *pw)
+{
+    char *errMsg = NULL;
+    char **results;
+    int rows;
+    int columns;
+    int ret;
+    char buf[80];
+    int userid = 0;
+
+    if (flag_init == 1)
+    {
+        snprintf(buf, sizeof(buf), "SELECT * FROM user WHERE (nickname='%s') AND (pw='%s');", username, pw);
+        ret = sqlite3_get_table(handle, buf, &results, &rows, &columns, &errMsg);
+        if (ret == SQLITE_OK)
+        {
+            if (rows == 1)
+            {
+                userid = atoi(results[columns]);
+                printf("Welcome! %s!\r\n", username);
+                return userid;
+            }
+            else if (rows == 0)
+            {
+                printf("There is no such user!\r\n");
+                sqlite3_free_table(results);
+                return -1;
+            }
+            else
+            {
+                printf("Login Error!\r\n");
+                sqlite3_free_table(results);
+                return -1;
+            }
+            sqlite3_free_table(results);
+        }
+        else
+        {
+            printf("Login Error!\r\n");
+            sqlite3_free_table(results);
+            return -1;
+        }
     }
 }
 int add_user(char *username, char *pw)
@@ -131,50 +175,6 @@ int add_user(char *username, char *pw)
         else
         {
             printf("Add user failed!\r\n");
-            sqlite3_free_table(results);
-            return -1;
-        }
-    }
-}
-int login(char *username, char *pw)
-{
-    char *errMsg = NULL;
-    char **results;
-    int rows;
-    int columns;
-    int ret;
-    char buf[80];
-    int userid = 0;
-
-    if (flag_init == 1)
-    {
-        snprintf(buf, sizeof(buf), "SELECT * FROM user WHERE (nickname='%s') AND (pw='%s');", username, pw);
-        ret = sqlite3_get_table(handle, buf, &results, &rows, &columns, &errMsg);
-        if (ret == SQLITE_OK)
-        {
-            if (rows == 1)
-            {
-                userid = atoi(results[columns]);
-                printf("Welcome! %s!\r\n", username);
-                return userid;
-            }
-            else if (rows == 0)
-            {
-                printf("There is no such user!\r\n");
-                sqlite3_free_table(results);
-                return -1;
-            }
-            else
-            {
-                printf("Login Error!\r\n");
-                sqlite3_free_table(results);
-                return -1;
-            }
-            sqlite3_free_table(results);
-        }
-        else
-        {
-            printf("Login Error!\r\n");
             sqlite3_free_table(results);
             return -1;
         }
@@ -330,6 +330,73 @@ int add_song(int songid, char *songname, int genreid, int artistid)
         }
     }
 }
+int add_playlist_id(int userid, int songid)
+{
+    char *errMsg = NULL;
+    char **results;
+    int rows;
+    int columns;
+    int ret;
+    char buf[200];
+
+    snprintf(buf, sizeof(buf), "SELECT * FROM playlist WHERE (userid='%d') AND (songid='%d')", userid, songid);
+    ret = sqlite3_get_table(handle, buf, &results, &rows, &columns, &errMsg);
+    if (ret == SQLITE_OK)
+    {
+        if (rows == 0)
+        {
+            snprintf(buf, sizeof(buf), "INSERT into playlist (userid, songid) values('%d', '%d');", userid, songid);
+            ret = sqlite3_get_table(handle, buf, &results, &rows, &columns, &errMsg);
+            if (ret != SQLITE_OK)
+                printf("Add Playlist Error\r\n");
+            else
+                printf("Added!\r\n");
+        }
+        else
+            printf("Already Added\r\n");
+    }
+    else
+        printf("Search Error\r\n");
+    sqlite3_free_table(results);
+
+    return 0;
+}
+int add_playlist(int userid)
+{
+    char *errMsg = NULL;
+    char **results;
+    int rows;
+    int columns;
+    int ret;
+    char buf[200];
+
+    int songid;
+
+    printf("Enter Music ID : ");
+    scanf("%d", &songid);
+
+    snprintf(buf, sizeof(buf), "SELECT * FROM playlist WHERE (userid='%d') AND (songid='%d')", userid, songid);
+    ret = sqlite3_get_table(handle, buf, &results, &rows, &columns, &errMsg);
+    if (ret == SQLITE_OK)
+    {
+        if (rows == 0)
+        {
+            snprintf(buf, sizeof(buf), "INSERT into playlist (userid, songid) values('%d', '%d');", userid, songid);
+            ret = sqlite3_get_table(handle, buf, &results, &rows, &columns, &errMsg);
+            if (ret != SQLITE_OK)
+                printf("Add Playlist Error\r\n");
+            else
+                printf("Added!\r\n");
+        }
+        else
+            printf("Already Added\r\n");
+    }
+    else
+        printf("Search Error\r\n");
+    sqlite3_free_table(results);
+
+    return 0;
+}
 void list_table(char *tablename)
 {
     char *errMsg = NULL;
@@ -463,7 +530,7 @@ void search_music_func(int userid)
     char buf[512];
 
     int menu_search = 0;
-    char flag_agree;
+    char flag_agree = NULL;
     int songid;
     char title[50];
     char artist[32];
@@ -484,13 +551,17 @@ void search_music_func(int userid)
             {
                 if (rows == 0)
                 {
-                    while (!(flag_agree == 'N' || flag_agree == 'n'))
+                    while (1)
                     {
                         printf("Music %d Not Found!\r\nWant to add this music to our DB? (Y/N) : ", songid);
                         scanf("%c", &flag_agree);
                         if (flag_agree == 'Y' || flag_agree == 'y')
                         {
                             add_music_func();
+                            break;
+                        }
+                        else if(flag_agree == 'N' || flag_agree == 'n')
+                        {
                             break;
                         }
                         else
@@ -512,10 +583,38 @@ void search_music_func(int userid)
                         else
                             printf("\r\n");
                     }
+                    snprintf(buf, sizeof(buf), "SELECT * FROM playlist WHERE (userid='%d') AND (songid='%d');", userid, songid);
+                    ret = sqlite3_get_table(handle, buf, &results, &rows, &columns, &errMsg);
+                    if (ret == SQLITE_OK)
+                    {
+                        if (rows == 0)
+                        {
+                            while (1)
+                            {
+                                printf("Would you like to add this song on your playlist? (Y/N) : ");
+                                scanf("%c", &flag_agree);
+                                if (flag_agree == 'Y' || flag_agree == 'y')
+                                {
+                                    add_playlist_id(userid, songid);
+                                    break;
+                                }
+                                else if(flag_agree == 'N' || flag_agree == 'n')
+                                {
+                                    break;
+                                }
+                                else
+                                {
+                                    printf("Wrong input\r\n");
+                                }
+                            }
+                        }
+                        else printf("The music is already registered\r\n");
+                    }
                 }
             }
             else
                 printf("Error!\r\n");
+            sqlite3_free_table(results);
             break;
 
         case 2:
@@ -527,13 +626,17 @@ void search_music_func(int userid)
             {
                 if (rows == 0)
                 {
-                    while (!(flag_agree == 'N' || flag_agree == 'n'))
+                    while (1)
                     {
                         printf("Music %s Not Found!\r\nWant to add this music to our DB? (Y/N) : ", title);
                         scanf("%c", &flag_agree);
                         if (flag_agree == 'Y' || flag_agree == 'y')
                         {
                             add_music_func();
+                            break;
+                        }
+                        else if(flag_agree == 'N' || flag_agree == 'n')
+                        {
                             break;
                         }
                         else
@@ -554,6 +657,25 @@ void search_music_func(int userid)
                             printf("\r\n==============================================\r\n");
                         else
                             printf("\r\n");
+                    }
+
+                    while (1)
+                    {
+                        printf("Would you like to add this song on your playlist? (Y/N) : ");
+                        scanf("%c", &flag_agree);
+                        if (flag_agree == 'Y' || flag_agree == 'y')
+                        {
+                            add_playlist(userid);
+                            break;
+                        }
+                        else if(flag_agree == 'N' || flag_agree == 'n')
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            printf("Wrong input\r\n");
+                        }
                     }
                 }
             }
@@ -570,13 +692,17 @@ void search_music_func(int userid)
             {
                 if (rows == 0)
                 {
-                    while (!(flag_agree == 'N' || flag_agree == 'n'))
+                    while (1)
                     {
                         printf("Music %s Not Found!\r\nWant to add this music to our DB? (Y/N) : ", title);
                         scanf("%c", &flag_agree);
                         if (flag_agree == 'Y' || flag_agree == 'y')
                         {
                             add_music_func();
+                            break;
+                        }
+                        else if(flag_agree == 'N' || flag_agree == 'n')
+                        {
                             break;
                         }
                         else
@@ -597,6 +723,25 @@ void search_music_func(int userid)
                             printf("\r\n==============================================\r\n");
                         else
                             printf("\r\n");
+                    }
+
+                    while (1)
+                    {
+                        printf("Would you like to add this song on your playlist? (Y/N) : ");
+                        scanf("%c", &flag_agree);
+                        if (flag_agree == 'Y' || flag_agree == 'y')
+                        {
+                            add_playlist(userid);
+                            break;
+                        }
+                        else if(flag_agree == 'N' || flag_agree == 'n')
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            printf("Wrong input\r\n");
+                        }
                     }
                 }
             }
@@ -606,20 +751,24 @@ void search_music_func(int userid)
             
         case 4:
             printf("Genre : ");
-            scanf("%s", artist);
+            scanf("%s", genre);
             snprintf(buf, sizeof(buf), "SELECT song.songid, song.songname, artist.artistname, genre.genrename FROM song LEFT OUTER JOIN artist ON song.artistid=artist.artistid LEFT OUTER JOIN genre ON song.genreid=genre.genreid WHERE genre.genrename IN ('%s');", genre);
             ret = sqlite3_get_table(handle, buf, &results, &rows, &columns, &errMsg);
             if (ret == SQLITE_OK)
             {
                 if (rows == 0)
                 {
-                    while (!(flag_agree == 'N' || flag_agree == 'n'))
+                    while (1)
                     {
-                        printf("Music %s Not Found!\r\nWant to add this music to our DB? (Y/N) : ", title);
+                        printf("%s Music Not Found!\r\nWant to add this music to our DB? (Y/N) : ", genre);
                         scanf("%c", &flag_agree);
                         if (flag_agree == 'Y' || flag_agree == 'y')
                         {
                             add_music_func();
+                            break;
+                        }
+                        else if(flag_agree == 'N' || flag_agree == 'n')
+                        {
                             break;
                         }
                         else
@@ -640,6 +789,25 @@ void search_music_func(int userid)
                             printf("\r\n==============================================\r\n");
                         else
                             printf("\r\n");
+                    }
+
+                    while (1)
+                    {
+                        printf("Would you like to add this song on your playlist? (Y/N) : ");
+                        scanf("%c", &flag_agree);
+                        if (flag_agree == 'Y' || flag_agree == 'y')
+                        {
+                            add_playlist(userid);
+                            break;
+                        }
+                        else if(flag_agree == 'N' || flag_agree == 'n')
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            printf("Wrong input\r\n");
+                        }
                     }
                 }
             }
@@ -656,8 +824,315 @@ void search_music_func(int userid)
         }
     }
 }
-void rate_difficulty_func(int userid)
+void search_playlist(int userid)
 {
+    char *errMsg = NULL;
+    char **results;
+    int rows;
+    int columns;
+    int ret;
+    char buf[512];
+
+    int menu_search = 0;
+    char flag_agree = NULL;
+    int songid;
+    char title[50];
+    char artist[32];
+    char genre[16];
+
+    while (1)
+    {
+        printf("1) SEARCH by Number\r\n2) SEARCH by Title\r\n3) SEARCH by Artist\r\n4) SEARCH by Genre\r\n5) See ALL of playlist\r\n0) Return to Main Menu\r\nSelect Search Rule : ");
+        scanf("%d", &menu_search);
+        switch (menu_search)
+        {
+        case 1:
+            printf("Music ID : ");
+            scanf("%d", &songid);
+            snprintf(buf, sizeof(buf), "SELECT user.nickname, song.songid, song.songname, artist.artistname, genre.genrename FROM playlist LEFT OUTER JOIN user ON playlist.userid=user.userid LEFT OUTER JOIN song ON playlist.songid=song.songid LEFT OUTER JOIN genre ON song.genreid=genre.genreid LEFT OUTER JOIN artist ON song.artistid=artist.artistid WHERE song.songid IN ('%d');", songid);
+            ret = sqlite3_get_table(handle, buf, &results, &rows, &columns, &errMsg);
+            if (ret == SQLITE_OK)
+            {
+                if (ret == SQLITE_OK)
+                {
+                    if (rows == 0)
+                    {
+                        while (1)
+                        {
+                            printf("Would you like to add this song on your playlist? (Y/N) : ");
+                            scanf("%c", &flag_agree);
+                            if (flag_agree == 'Y' || flag_agree == 'y')
+                            {
+                                add_playlist_id(userid, songid);
+                                break;
+                            }
+                            else if (flag_agree == 'N' || flag_agree == 'n')
+                            {
+                                break;
+                            }
+                            else
+                            {
+                                printf("Wrong input\r\n");
+                            }
+                        }
+                    }
+                    else
+                        printf("The music is already registered\r\n");
+                }
+                else
+                {
+                    for (int i = 0; i <= rows; i++)
+                    {
+                        for (int j = 0; j < columns; j++)
+                        {
+                            printf("%s\t", results[i * columns + j]);
+                        }
+                        if (i == 0)
+                            printf("\r\n==============================================\r\n");
+                        else
+                            printf("\r\n");
+                    }
+                }
+            }
+            else
+                printf("Error!\r\n");
+            sqlite3_free_table(results);
+            break;
+
+        case 2:
+            printf("Music Title : ");
+            scanf("%s", title);
+            snprintf(buf, sizeof(buf), "SELECT song.songid, song.songname, artist.artistname, genre.genrename FROM song LEFT OUTER JOIN artist ON song.artistid=artist.artistid LEFT OUTER JOIN genre ON song.genreid=genre.genreid WHERE song.songname IN ('%s');", title);
+            ret = sqlite3_get_table(handle, buf, &results, &rows, &columns, &errMsg);
+            if (ret == SQLITE_OK)
+            {
+                if (rows == 0)
+                {
+                    while (1)
+                    {
+                        printf("Music %s Not Found!\r\nWant to add this music to our DB? (Y/N) : ", title);
+                        scanf("%c", &flag_agree);
+                        if (flag_agree == 'Y' || flag_agree == 'y')
+                        {
+                            add_music_func();
+                            break;
+                        }
+                        else if(flag_agree == 'N' || flag_agree == 'n')
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            printf("Wrong input\r\n");
+                        }
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i <= rows; i++)
+                    {
+                        for (int j = 0; j < columns; j++)
+                        {
+                            printf("%s\t", results[i * columns + j]);
+                        }
+                        if (i == 0)
+                            printf("\r\n==============================================\r\n");
+                        else
+                            printf("\r\n");
+                    }
+
+                    while (1)
+                    {
+                        printf("Would you like to add this song on your playlist? (Y/N) : ");
+                        scanf("%c", &flag_agree);
+                        if (flag_agree == 'Y' || flag_agree == 'y')
+                        {
+                            add_playlist(userid);
+                            break;
+                        }
+                        else if(flag_agree == 'N' || flag_agree == 'n')
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            printf("Wrong input\r\n");
+                        }
+                    }
+                }
+            }
+            else
+                printf("Error!\r\n");
+            break;
+
+        case 3:
+            printf("Artist : ");
+            scanf("%s", artist);
+            snprintf(buf, sizeof(buf), "SELECT song.songid, song.songname, artist.artistname, genre.genrename FROM song LEFT OUTER JOIN artist ON song.artistid=artist.artistid LEFT OUTER JOIN genre ON song.genreid=genre.genreid WHERE artist.artistname IN ('%s');", artist);
+            ret = sqlite3_get_table(handle, buf, &results, &rows, &columns, &errMsg);
+            if (ret == SQLITE_OK)
+            {
+                if (rows == 0)
+                {
+                    while (1)
+                    {
+                        printf("Music %s Not Found!\r\nWant to add this music to our DB? (Y/N) : ", title);
+                        scanf("%c", &flag_agree);
+                        if (flag_agree == 'Y' || flag_agree == 'y')
+                        {
+                            add_music_func();
+                            break;
+                        }
+                        else if(flag_agree == 'N' || flag_agree == 'n')
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            printf("Wrong input\r\n");
+                        }
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i <= rows; i++)
+                    {
+                        for (int j = 0; j < columns; j++)
+                        {
+                            printf("%s\t", results[i * columns + j]);
+                        }
+                        if (i == 0)
+                            printf("\r\n==============================================\r\n");
+                        else
+                            printf("\r\n");
+                    }
+
+                    while (1)
+                    {
+                        printf("Would you like to add this song on your playlist? (Y/N) : ");
+                        scanf("%c", &flag_agree);
+                        if (flag_agree == 'Y' || flag_agree == 'y')
+                        {
+                            add_playlist(userid);
+                            break;
+                        }
+                        else if(flag_agree == 'N' || flag_agree == 'n')
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            printf("Wrong input\r\n");
+                        }
+                    }
+                }
+            }
+            else
+                printf("Error!\r\n");
+            break;
+            
+        case 4:
+            printf("Genre : ");
+            scanf("%s", genre);
+            snprintf(buf, sizeof(buf), "SELECT song.songid, song.songname, artist.artistname, genre.genrename FROM song LEFT OUTER JOIN artist ON song.artistid=artist.artistid LEFT OUTER JOIN genre ON song.genreid=genre.genreid WHERE genre.genrename IN ('%s');", genre);
+            ret = sqlite3_get_table(handle, buf, &results, &rows, &columns, &errMsg);
+            if (ret == SQLITE_OK)
+            {
+                if (rows == 0)
+                {
+                    while (1)
+                    {
+                        printf("%s Music Not Found!\r\nWant to add this music to our DB? (Y/N) : ", genre);
+                        scanf("%c", &flag_agree);
+                        if (flag_agree == 'Y' || flag_agree == 'y')
+                        {
+                            add_music_func();
+                            break;
+                        }
+                        else if(flag_agree == 'N' || flag_agree == 'n')
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            printf("Wrong input\r\n");
+                        }
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i <= rows; i++)
+                    {
+                        for (int j = 0; j < columns; j++)
+                        {
+                            printf("%s\t", results[i * columns + j]);
+                        }
+                        if (i == 0)
+                            printf("\r\n==============================================\r\n");
+                        else
+                            printf("\r\n");
+                    }
+
+                    while (1)
+                    {
+                        printf("Would you like to add this song on your playlist? (Y/N) : ");
+                        scanf("%c", &flag_agree);
+                        if (flag_agree == 'Y' || flag_agree == 'y')
+                        {
+                            add_playlist(userid);
+                            break;
+                        }
+                        else if(flag_agree == 'N' || flag_agree == 'n')
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            printf("Wrong input\r\n");
+                        }
+                    }
+                }
+            }
+            else
+                printf("Error!\r\n");
+            break;
+
+        case 5:
+            snprintf(buf, sizeof(buf), "SELECT user.nickname, song.songid, song.songname, artist.artistname, genre.genrename FROM playlist LEFT OUTER JOIN user ON playlist.userid=user.userid LEFT OUTER JOIN song ON playlist.songid=song.songid LEFT OUTER JOIN genre ON song.genreid=genre.genreid LEFT OUTER JOIN artist ON song.artistid=artist.artistid WHERE user.userid IN ('%d');", userid);
+            ret = sqlite3_get_table(handle, buf, &results, &rows, &columns, &errMsg);
+            if (ret == SQLITE_OK)
+            {
+                if (rows == 0)
+                    printf("No Music in your playlist!\r\n");
+                else
+                {
+                    for (int i = 0; i <= rows; i++)
+                    {
+                        for (int j = 0; j < columns; j++)
+                        {
+                            printf("%s\t", results[i * columns + j]);
+                        }
+                        if (i == 0)
+                            printf("\r\n==============================================\r\n");
+                        else
+                            printf("\r\n");
+                    }
+                }
+            }
+            else
+                printf("Something Wrong!\r\n");
+            break;
+            
+        case 0:
+            return NULL;
+            break;
+        default:
+            printf("Wrong input\r\n");
+            break;
+        }
+    }
+
+    sqlite3_free_table(results);
 }
 void recommend_music_func(int userid)
 {
@@ -813,7 +1288,7 @@ LOGIN_SELECT:
             // system("clear");
             printf("\r\n");
             // list_table("song");
-            printf("1) ADD Music in DB\r\n2) REMOVE Music from DB\r\n3) SEARCH Music and Register Music to Playlist\r\n4) RATE Difficulty of Music\r\n5) Music Recommendation\r\n0) Exit Program\r\nChoose Menu : ");
+            printf("1) ADD Music in DB\r\n2) REMOVE Music from DB\r\n3) SEARCH Music and Register Music to Playlist\r\n4) SEARCH Music from Playlist\r\n5) Music Recommendation\r\n0) Exit Program\r\nChoose Menu : ");
             scanf("%d", &select_menu);
             switch (select_menu)
             {
@@ -822,11 +1297,12 @@ LOGIN_SELECT:
                 break;
             case 2:
                 remove_music_func();
+                break;
             case 3:
                 search_music_func(userid);
                 break;
             case 4:
-                rate_difficulty_func(userid);
+                search_playlist(userid);
                 break;
             case 5:
                 recommend_music_func(userid);
