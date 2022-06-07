@@ -1,10 +1,47 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <termio.h>
 #include "sqlite3.h"
+#include <openssl/md5.h>
 
 sqlite3 *handle;
 int flag_init = 0;
+
+// MD5 Hash Function
+
+char *str2md5(const char *str, int length)
+{
+    int n;
+    MD5_CTX c;
+    unsigned char digest[16];
+    char *out = (char *)malloc(33);
+
+    MD5_Init(&c);
+
+    while (length > 0)
+    {
+        if (length > 512)
+        {
+            MD5_Update(&c, str, 512);
+        }
+        else
+        {
+            MD5_Update(&c, str, length);
+        }
+        length -= 512;
+        str += 512;
+    }
+
+    MD5_Final(digest, &c);
+
+    for (n = 0; n < 16; ++n)
+    {
+        snprintf(&(out[n * 2]), 16 * 2, "%02x", (unsigned int)digest[n]);
+    }
+
+    return out;
+}
 
 // DB Functions
 
@@ -476,11 +513,14 @@ int add_playlist_func(int userid)
                     else
                         printf("Music Added!\r\n");
                 }
-                else printf("Already Added\r\n");
+                else
+                    printf("Already Added\r\n");
             }
-            else printf("Error\r\n");
+            else
+                printf("Error\r\n");
         }
-        else printf("Error\r\n");        
+        else
+            printf("Error\r\n");
     }
     else
         printf("Search Error\r\n");
@@ -520,8 +560,8 @@ int search_playlist_func(int userid)
                 }
                 else
                 {
-                    printf("No.%s : %s - %s, %s, Difficulty : %s\r\n", results[columns+1], results[columns+2], results[columns+3], results[columns+4], results[columns+5]);
-                        printf("\r\n");
+                    printf("No.%s : %s - %s, %s, Difficulty : %s\r\n", results[columns + 1], results[columns + 2], results[columns + 3], results[columns + 4], results[columns + 5]);
+                    printf("\r\n");
                 }
             }
             else
@@ -543,7 +583,7 @@ int search_playlist_func(int userid)
                 {
                     for (int i = 1; i <= rows; i++)
                     {
-                        printf("No.%s : %s - %s, %s, Difficulty : %s\r\n", results[i*columns+1], results[i*columns+2], results[i*columns+3], results[i*columns+4], results[i*columns+5]);
+                        printf("No.%s : %s - %s, %s, Difficulty : %s\r\n", results[i * columns + 1], results[i * columns + 2], results[i * columns + 3], results[i * columns + 4], results[i * columns + 5]);
                         printf("\r\n");
                     }
                 }
@@ -565,7 +605,7 @@ int search_playlist_func(int userid)
                 {
                     for (int i = 1; i <= rows; i++)
                     {
-                        printf("No.%s : %s - %s, %s, Difficulty : %s\r\n", results[i*columns+1], results[i*columns+2], results[i*columns+3], results[i*columns+4], results[i*columns+5]);
+                        printf("No.%s : %s - %s, %s, Difficulty : %s\r\n", results[i * columns + 1], results[i * columns + 2], results[i * columns + 3], results[i * columns + 4], results[i * columns + 5]);
                         printf("\r\n");
                     }
                 }
@@ -587,7 +627,7 @@ int search_playlist_func(int userid)
                 {
                     for (int i = 1; i <= rows; i++)
                     {
-                        printf("No.%s : %s - %s, %s, Difficulty : %s\r\n", results[i*columns+1], results[i*columns+2], results[i*columns+3], results[i*columns+4], results[i*columns+5]);
+                        printf("No.%s : %s - %s, %s, Difficulty : %s\r\n", results[i * columns + 1], results[i * columns + 2], results[i * columns + 3], results[i * columns + 4], results[i * columns + 5]);
                         printf("\r\n");
                     }
                 }
@@ -678,7 +718,7 @@ void see_all_playlist(int userid)
         {
             for (int i = 1; i <= rows; i++)
             {
-                printf("No.%s : %s - %s, %s, Difficulty : %s\r\n", results[i*columns+1], results[i*columns+2], results[i*columns+3], results[i*columns+4], results[i*columns+5]);
+                printf("No.%s : %s - %s, %s, Difficulty : %s\r\n", results[i * columns + 1], results[i * columns + 2], results[i * columns + 3], results[i * columns + 4], results[i * columns + 5]);
                 printf("\r\n");
             }
         }
@@ -814,11 +854,12 @@ int search_music_func(int userid) // number 3
                 }
                 else
                 {
-                    printf("No.%s : %s - %s, %s\r\n", results[columns], results[columns+1], results[columns+2], results[columns+3]);
+                    printf("No.%s : %s - %s, %s\r\n", results[columns], results[columns + 1], results[columns + 2], results[columns + 3]);
                     printf("\r\n");
                 }
             }
-            else printf("Error!\r\n");
+            else
+                printf("Error!\r\n");
             sqlite3_free_table(results);
             break;
 
@@ -837,12 +878,13 @@ int search_music_func(int userid) // number 3
                 {
                     for (int i = 1; i <= rows; i++)
                     {
-                        printf("No.%s : %s - %s, %s\r\n", results[i*columns], results[i*columns+1], results[i*columns+2], results[i*columns+3]);
+                        printf("No.%s : %s - %s, %s\r\n", results[i * columns], results[i * columns + 1], results[i * columns + 2], results[i * columns + 3]);
                         printf("\r\n");
                     }
                 }
             }
-            else printf("Error!\r\n");
+            else
+                printf("Error!\r\n");
             sqlite3_free_table(results);
             break;
 
@@ -861,12 +903,13 @@ int search_music_func(int userid) // number 3
                 {
                     for (int i = 1; i <= rows; i++)
                     {
-                        printf("No.%s : %s - %s, %s\r\n", results[i*columns], results[i*columns+1], results[i*columns+2], results[i*columns+3]);
+                        printf("No.%s : %s - %s, %s\r\n", results[i * columns], results[i * columns + 1], results[i * columns + 2], results[i * columns + 3]);
                         printf("\r\n");
                     }
                 }
             }
-            else printf("Error!\r\n");
+            else
+                printf("Error!\r\n");
             sqlite3_free_table(results);
             break;
 
@@ -885,12 +928,13 @@ int search_music_func(int userid) // number 3
                 {
                     for (int i = 1; i <= rows; i++)
                     {
-                        printf("No.%s : %s - %s, %s\r\n", results[i*columns], results[i*columns+1], results[i*columns+2], results[i*columns+3]);
+                        printf("No.%s : %s - %s, %s\r\n", results[i * columns], results[i * columns + 1], results[i * columns + 2], results[i * columns + 3]);
                         printf("\r\n");
                     }
                 }
             }
-            else printf("Error!\r\n");
+            else
+                printf("Error!\r\n");
             sqlite3_free_table(results);
             break;
 
@@ -967,7 +1011,7 @@ int recommend_music_func(int userid) // number 5
                 ret = sqlite3_get_table(handle, buf, &results, &rows, &columns, &errMsg);
                 if (ret == SQLITE_OK)
                 {
-                    printf("No.%s : %s - %s, %s, Difficulty : %s\r\n", results[columns+1], results[columns+2], results[columns+3], results[columns+4], results[columns+5]);
+                    printf("No.%s : %s - %s, %s, Difficulty : %s\r\n", results[columns + 1], results[columns + 2], results[columns + 3], results[columns + 4], results[columns + 5]);
                     printf("\r\n");
                 }
                 else
@@ -991,7 +1035,7 @@ int recommend_music_func(int userid) // number 5
                 ret = sqlite3_get_table(handle, buf, &results, &rows, &columns, &errMsg);
                 if (ret == SQLITE_OK)
                 {
-                    printf("No.%s : %s - %s, %s, Difficulty : %s\r\n", results[columns+1], results[columns+2], results[columns+3], results[columns+4], results[columns+5]);
+                    printf("No.%s : %s - %s, %s, Difficulty : %s\r\n", results[columns + 1], results[columns + 2], results[columns + 3], results[columns + 4], results[columns + 5]);
                     printf("\r\n");
                 }
                 else
@@ -1015,7 +1059,7 @@ int recommend_music_func(int userid) // number 5
                 ret = sqlite3_get_table(handle, buf, &results, &rows, &columns, &errMsg);
                 if (ret == SQLITE_OK)
                 {
-                    printf("No.%s : %s - %s, %s, Difficulty : %s\r\n", results[columns+1], results[columns+2], results[columns+3], results[columns+4], results[columns+5]);
+                    printf("No.%s : %s - %s, %s, Difficulty : %s\r\n", results[columns + 1], results[columns + 2], results[columns + 3], results[columns + 4], results[columns + 5]);
                     printf("\r\n");
                 }
                 else
@@ -1081,11 +1125,13 @@ LOGIN_SELECT:
     if (select_login == 0) // user join
     {
         char username_new[16], pw_new[32];
+                
         printf("Username : ");
         scanf("%s", username_new);
         printf("Password : ");
         scanf("%s", pw_new);
-        add_user(username_new, pw_new);
+        char *pw_md5 = str2md5(pw_new, strlen(pw_new));
+        add_user(username_new, pw_md5);
         goto LOGIN_SELECT;
     }
     else if (select_login == 1)
@@ -1097,7 +1143,8 @@ LOGIN_SELECT:
         tcsetattr(0, TCSAFLUSH, &new);
         scanf("%s", pw_new);
         tcsetattr(0, TCSAFLUSH, &old);
-        userid = login(username_new, pw_new);
+        char *pw_md5 = str2md5(pw_new, strlen(pw_new));
+        userid = login(username_new, pw_md5);
         if (userid == -1)
             goto LOGIN_SELECT;
     }
@@ -1107,6 +1154,8 @@ LOGIN_SELECT:
         goto LOGIN_SELECT;
     }
 
+    list_table("user");
+
     while (1)
     {
         select_menu = 0;
@@ -1114,7 +1163,7 @@ LOGIN_SELECT:
         {
             // system("clear");
             printf("\r\n");
-            // list_table("song");
+            
             printf("1) ADD Music in DB\r\n2) REMOVE Music from DB\r\n3) SEARCH Music and Register Music to Playlist\r\n4) SEARCH Music from Playlist\r\n5) Music Recommendation\r\n0) Exit Program\r\nChoose Menu : ");
             scanf("%d", &select_menu);
             switch (select_menu)
