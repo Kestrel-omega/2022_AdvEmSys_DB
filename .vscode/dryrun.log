@@ -1,4 +1,4 @@
-make --dry-run --always-make --keep-going --print-directory
+make --dry-run --keep-going --print-directory
 make: Entering directory '/home/kestrel/DB'
 cc    -c -o main.o main.c
 gcc -o project_DB.out main.c -lsqlite3

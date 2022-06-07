@@ -4,3 +4,6 @@ project_DB.out : main.o
 
 clean :
 	rm -f *.o *.out
+
+clean_DB :
+	rm -f *.o *.out *.db
