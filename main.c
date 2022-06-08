@@ -1006,19 +1006,23 @@ int recommend_music_func(int userid) // number 5
             ret = sqlite3_get_table(handle, buf, &results, &rows, &columns, &errMsg);
             if (ret == SQLITE_OK)
             {
-                songid = atoi(results[columns]);
-                snprintf(buf, sizeof(buf), "SELECT user.nickname, song.songid, song.songname, artist.artistname, genre.genrename, playlist.difficulty FROM playlist LEFT OUTER JOIN user ON playlist.userid=user.userid LEFT OUTER JOIN song ON playlist.songid=song.songid LEFT OUTER JOIN genre ON song.genreid=genre.genreid LEFT OUTER JOIN artist ON song.artistid=artist.artistid WHERE (user.userid='%d') AND (song.songid='%d') ;", userid, songid);
-                ret = sqlite3_get_table(handle, buf, &results, &rows, &columns, &errMsg);
-                if (ret == SQLITE_OK)
+                if (rows > 0)
                 {
-                    printf("No.%s : %s - %s, %s, Difficulty : %s\r\n", results[columns + 1], results[columns + 2], results[columns + 3], results[columns + 4], results[columns + 5]);
-                    printf("\r\n");
-                }
-                else
-                    printf("Error\r\n");
+                    songid = atoi(results[columns]);
+                    snprintf(buf, sizeof(buf), "SELECT user.nickname, song.songid, song.songname, artist.artistname, genre.genrename, playlist.difficulty FROM playlist LEFT OUTER JOIN user ON playlist.userid=user.userid LEFT OUTER JOIN song ON playlist.songid=song.songid LEFT OUTER JOIN genre ON song.genreid=genre.genreid LEFT OUTER JOIN artist ON song.artistid=artist.artistid WHERE (user.userid='%d') AND (song.songid='%d') ;", userid, songid);
+                    ret = sqlite3_get_table(handle, buf, &results, &rows, &columns, &errMsg);
+                    if (ret == SQLITE_OK)
+                    {
+                        printf("No.%s : %s - %s, %s, Difficulty : %s\r\n", results[columns + 1], results[columns + 2], results[columns + 3], results[columns + 4], results[columns + 5]);
+                        printf("\r\n");
+                    }
+                    else
+                        printf("Error\r\n");
 
-                sqlite3_free_table(results);
-                break;
+                    sqlite3_free_table(results);
+                    break;
+                }
+                else printf("No Music in Playlist!\r\n");
             }
             else
                 printf("Error!\r\n");
@@ -1030,19 +1034,23 @@ int recommend_music_func(int userid) // number 5
             ret = sqlite3_get_table(handle, buf, &results, &rows, &columns, &errMsg);
             if (ret == SQLITE_OK)
             {
-                songid = atoi(results[columns]);
-                snprintf(buf, sizeof(buf), "SELECT user.nickname, song.songid, song.songname, artist.artistname, genre.genrename, playlist.difficulty FROM playlist LEFT OUTER JOIN user ON playlist.userid=user.userid LEFT OUTER JOIN song ON playlist.songid=song.songid LEFT OUTER JOIN genre ON song.genreid=genre.genreid LEFT OUTER JOIN artist ON song.artistid=artist.artistid WHERE (user.userid='%d') AND (song.songid='%d') ;", userid, songid);
-                ret = sqlite3_get_table(handle, buf, &results, &rows, &columns, &errMsg);
-                if (ret == SQLITE_OK)
+                if (rows > 0)
                 {
-                    printf("No.%s : %s - %s, %s, Difficulty : %s\r\n", results[columns + 1], results[columns + 2], results[columns + 3], results[columns + 4], results[columns + 5]);
-                    printf("\r\n");
-                }
-                else
-                    printf("Error\r\n");
+                    songid = atoi(results[columns]);
+                    snprintf(buf, sizeof(buf), "SELECT user.nickname, song.songid, song.songname, artist.artistname, genre.genrename, playlist.difficulty FROM playlist LEFT OUTER JOIN user ON playlist.userid=user.userid LEFT OUTER JOIN song ON playlist.songid=song.songid LEFT OUTER JOIN genre ON song.genreid=genre.genreid LEFT OUTER JOIN artist ON song.artistid=artist.artistid WHERE (user.userid='%d') AND (song.songid='%d') ;", userid, songid);
+                    ret = sqlite3_get_table(handle, buf, &results, &rows, &columns, &errMsg);
+                    if (ret == SQLITE_OK)
+                    {
+                        printf("No.%s : %s - %s, %s, Difficulty : %s\r\n", results[columns + 1], results[columns + 2], results[columns + 3], results[columns + 4], results[columns + 5]);
+                        printf("\r\n");
+                    }
+                    else
+                        printf("Error\r\n");
 
-                sqlite3_free_table(results);
-                break;
+                    sqlite3_free_table(results);
+                    break;
+                }
+                else printf("No Music in Playlist!\r\n");
             }
             else
                 printf("Error!\r\n");
@@ -1054,19 +1062,24 @@ int recommend_music_func(int userid) // number 5
             ret = sqlite3_get_table(handle, buf, &results, &rows, &columns, &errMsg);
             if (ret == SQLITE_OK)
             {
-                songid = atoi(results[columns]);
-                snprintf(buf, sizeof(buf), "SELECT user.nickname, song.songid, song.songname, artist.artistname, genre.genrename, playlist.difficulty FROM playlist LEFT OUTER JOIN user ON playlist.userid=user.userid LEFT OUTER JOIN song ON playlist.songid=song.songid LEFT OUTER JOIN genre ON song.genreid=genre.genreid LEFT OUTER JOIN artist ON song.artistid=artist.artistid WHERE (user.userid='%d') AND (song.songid='%d') ;", userid, songid);
-                ret = sqlite3_get_table(handle, buf, &results, &rows, &columns, &errMsg);
-                if (ret == SQLITE_OK)
+                if (rows > 0)
                 {
-                    printf("No.%s : %s - %s, %s, Difficulty : %s\r\n", results[columns + 1], results[columns + 2], results[columns + 3], results[columns + 4], results[columns + 5]);
-                    printf("\r\n");
+                    songid = atoi(results[columns]);
+                    snprintf(buf, sizeof(buf), "SELECT user.nickname, song.songid, song.songname, artist.artistname, genre.genrename, playlist.difficulty FROM playlist LEFT OUTER JOIN user ON playlist.userid=user.userid LEFT OUTER JOIN song ON playlist.songid=song.songid LEFT OUTER JOIN genre ON song.genreid=genre.genreid LEFT OUTER JOIN artist ON song.artistid=artist.artistid WHERE (user.userid='%d') AND (song.songid='%d') ;", userid, songid);
+                    ret = sqlite3_get_table(handle, buf, &results, &rows, &columns, &errMsg);
+                    if (ret == SQLITE_OK)
+                    {
+                        printf("No.%s : %s - %s, %s, Difficulty : %s\r\n", results[columns + 1], results[columns + 2], results[columns + 3], results[columns + 4], results[columns + 5]);
+                        printf("\r\n");
+                    }
+                    else
+                        printf("Error\r\n");
+
+                    sqlite3_free_table(results);
+                    break;
                 }
                 else
-                    printf("Error\r\n");
-
-                sqlite3_free_table(results);
-                break;
+                    printf("No Music in Playlist!\r\n");
             }
             else
                 printf("Error!\r\n");
